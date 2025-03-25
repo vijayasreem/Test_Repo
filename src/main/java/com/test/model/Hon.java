@@ -1,8 +1,8 @@
 
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
-import javax.persistence.Id;
 
 @Entity
 public class Hon {
@@ -12,6 +12,15 @@ public class Hon {
     private String applicantId;
     private int creditScore;
     private String loanOffer;
+
+    // Constructors
+    public Hon() {}
+
+    public Hon(String applicantId, int creditScore, String loanOffer) {
+        this.applicantId = applicantId;
+        this.creditScore = creditScore;
+        this.loanOffer = loanOffer;
+    }
 
     // Getters and Setters
     public Long getId() {
