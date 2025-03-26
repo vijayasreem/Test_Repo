@@ -7,34 +7,32 @@ from notification_service import notify_applicant
 from data_storage import store_credit_data_securely
 
 class CreditCheckSystem:
-    def __init__(self, max_processing_time_hours=24):
-        self.max_processing_time = timedelta(hours=max_processing_time_hours)
+    def __init__(self, applicant_id):
+        self.applicant_id = applicant_id
+        self.credit_score = None
+        self.credit_history = None
+        self.loan_offer = None
 
-    def perform_credit_check(self, applicant_id):
+    def perform_credit_check(self):
+        self.credit_score, self.credit_history = get_credit_score_and_history(self.applicant_id)
+        store_credit_data_securely(self.applicant_id, self.credit_score, self.credit_history)
+
+    def pre_qualify(self):
+        self.loan_offer = calculate_loan_offer(self.credit_score)
+
+    def notify_applicant(self):
+        notify_applicant(self.applicant_id, self.loan_offer)
+
+    def process_application(self):
         start_time = datetime.now()
-        
-        # Retrieve credit score and history
-        credit_data = get_credit_score_and_history(applicant_id)
-        if not credit_data:
-            return False
-        
-        # Calculate loan offer based on credit score
-        loan_offer = calculate_loan_offer(credit_data['score'])
-        
-        # Check if processing is within the allowed time frame
-        if datetime.now() - start_time > self.max_processing_time:
-            return False
-        
-        # Notify applicant of pre-qualification status
-        notify_applicant(applicant_id, loan_offer)
-        
-        # Securely store credit check data
-        store_credit_data_securely(applicant_id, credit_data)
-        
-        return True
+        self.perform_credit_check()
+        self.pre_qualify()
+        self.notify_applicant()
+        end_time = datetime.now()
+        assert end_time - start_time < timedelta(hours=24), "Process exceeded time frame"
 
 # Example usage
-credit_check_system = CreditCheckSystem()
-applicant_id = '12345'
-credit_check_system.perform_credit_check(applicant_id)
+applicant_id = "12345"
+credit_check_system = CreditCheckSystem(applicant_id)
+credit_check_system.process_application()
 ```
